@@ -9,7 +9,7 @@
 import Foundation
 
 /// Protocol defining the API client behavior
-protocol APIClient {
+protocol APIClientProtocol {
     /// Generic function to fetch data from a given URL with optional query parameters
     /// - Parameters:
     ///   - url: The endpoint URL (relative to the base URL)
@@ -20,7 +20,7 @@ protocol APIClient {
 }
 
 /// Default implementation of the `APIClient` protocol
-class DefaultAPIClient: APIClient {
+class APIClient: APIClientProtocol {
     /// Performs an asynchronous network request to fetch data from the given URL
     /// - Parameters:
     ///   - url: The endpoint URL (relative to the base URL)
