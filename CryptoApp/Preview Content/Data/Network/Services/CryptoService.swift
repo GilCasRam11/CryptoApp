@@ -13,7 +13,7 @@ protocol CryptoServiceProtocol {
     /// Fetches a list of cryptocurrencies
     /// - Returns: An array of `Crypto` objects
     /// - Throws: An error if the request fails or data decoding is unsuccessful
-    func fetchCryptos() async throws -> [Crypto]
+    func fetchCryptos(currency: String) async throws -> [Crypto]
 }
 
 /// Default implementation of the `CryptoService` protocol
@@ -30,10 +30,10 @@ class CryptoService: CryptoServiceProtocol {
     /// Fetches a list of cryptocurrencies from the API
     /// - Returns: An array of `Crypto` objects
     /// - Throws: An error if the request fails or decoding is unsuccessful
-    func fetchCryptos() async throws -> [Crypto] {
+    func fetchCryptos(currency: String) async throws -> [Crypto] {
         // Define query parameters for the API request
         let parameters = [
-            "vs_currency": "usd",  // Specify currency in which prices are fetched
+            "vs_currency": currency,  // Specify currency in which prices are fetched
             "per_page": "20",      // Limit the number of results per page
             "page": "1"            // Request the first page of results
         ]
@@ -46,8 +46,6 @@ class CryptoService: CryptoServiceProtocol {
             print("❌ Error fetching cryptos: \(error.localizedDescription)")
             throw error
         }
-        
-        // Fetch data from the API and return the decoded array of `Crypto` objects
-//        return try await apiClient.fetch(url: API.Endpoints.cryptoMarkets, parameters: parameters)
     }
 }
+
