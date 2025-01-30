@@ -7,20 +7,56 @@
 import SwiftUI
 
 struct CryptoListView: View {
-    @StateObject var viewModel = CryptoViewModel()
-
+    @StateObject private var viewModel = CryptoViewModel()
+    @FetchRequest(
+        entity: CryptoEntity.entity(),
+        sortDescriptors: [NSSortDescriptor(keyPath: \CryptoEntity.marketCap, ascending: false)]
+    ) private var storedCryptos: FetchedResults<CryptoEntity>
+    @Environment(\.managedObjectContext) private var context
     var body: some View {
         NavigationStack {
+            
             VStack {
+                TextField("Search Crypto", text: $viewModel.searchText)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+                Picker("Currency", selection: $viewModel.selectedCurrency) {
+                    Text("USD ($)").tag("usd")
+                    Text("EUR (€)").tag("eur")
+                }
+                .pickerStyle(SegmentedPickerStyle())
+                .padding()
+                .onChange(of: viewModel.selectedCurrency, {
+                    Task { await viewModel.fetchCryptos() }
+                })
+                if viewModel.isOffline {
+                    Text("Offline Mode")
+                        .font(.caption)
+                        .foregroundColor(.orange)
+                        .padding(5)
+                        .background(Color.yellow.opacity(0.2))
+                        .cornerRadius(5)
+                        .onAppear { print("🟠 Offline Mode UI Updated") }
+                }
                 if viewModel.isLoading {
                     ProgressView("Loading...")
                 } else if let errorMessage = viewModel.errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.red)
                 } else {
-                    List(viewModel.cryptos) { crypto in
-                        NavigationLink(value: crypto) {
-                            CryptoRowView(viewModel: viewModel, crypto: crypto)
+                    List {
+                        if viewModel.isOffline {
+                            ForEach(viewModel.filteredCryptos, id: \.self) { cryptoEntity in
+                                NavigationLink(value: cryptoEntity) {
+                                    CryptoRowView(viewModel: viewModel, crypto: cryptoEntity)
+                                }
+                            }
+                        } else {
+                            ForEach(viewModel.filteredCryptos) { crypto in
+                                NavigationLink(value: crypto) {
+                                    CryptoRowView(viewModel: viewModel, crypto: crypto)
+                                }
+                            }
                         }
                     }
                     .listStyle(PlainListStyle())
@@ -31,49 +67,13 @@ struct CryptoListView: View {
                 CryptoDetailView(viewModel: CryptoDetailViewModel(crypto: crypto))
             }
             .refreshable {
-                viewModel.fetchCryptos()
+                Task {
+                    await viewModel.fetchCryptos()
+                }
             }
         }
-        .onAppear {
-            if viewModel.cryptos.isEmpty { viewModel.fetchCryptos() }
+        .task {
+            await viewModel.fetchCryptos()
         }
-    }
-}
-
-
-struct CryptoRowView: View {
-    @ObservedObject var viewModel: CryptoViewModel
-    let crypto: Crypto
-    
-    var body: some View {
-        HStack {
-            AsyncImage(url: URL(string: crypto.image)) { image in
-                image.resizable()
-            } placeholder: {
-                ProgressView()
-            }
-            .frame(width: 50, height: 50)
-            .clipShape(Circle())
-            
-            VStack(alignment: .leading) {
-                Text(crypto.name)
-                    .font(.headline)
-                Text(crypto.symbol.uppercased())
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-            }
-            
-            Spacer()
-            
-            VStack(alignment: .trailing) {
-                Text("$\(crypto.currentPrice, specifier: "%.2f")")
-                    .font(.headline)
-                    .foregroundColor(.green)
-                Text(viewModel.formatDate(crypto.lastUpdated))
-                    .font(.footnote)
-                    .foregroundColor(.gray)
-            }
-        }
-        .padding(.vertical, 5)
     }
 }

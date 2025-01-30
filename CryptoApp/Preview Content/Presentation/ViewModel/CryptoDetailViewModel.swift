@@ -11,7 +11,7 @@ import Foundation
 @MainActor
 class CryptoDetailViewModel: ObservableObject {
     @Published var crypto: Crypto
-
+    
     init(crypto: Crypto) {
         self.crypto = crypto
     }
