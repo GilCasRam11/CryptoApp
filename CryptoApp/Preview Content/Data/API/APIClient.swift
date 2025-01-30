@@ -33,18 +33,28 @@ class APIClient: APIClientProtocol {
         
         // Add query parameters to the URL if available
         components.queryItems = parameters?.map { URLQueryItem(name: $0.key, value: $0.value) }
-
+        
         // Ensure the final URL is valid
         guard let url = components.url else { throw URLError(.badURL) }
-
+        
         // Perform the network request asynchronously
         let (data, response) = try await URLSession.shared.data(from: url)
-
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            print("❌ Response is not HTTPURLResponse")
+            throw URLError(.cannotParseResponse)
+        }
+        
+        guard (200...299).contains(httpResponse.statusCode) else {
+            print("❌ API returned error code: \(httpResponse.statusCode)")
+            throw URLError(.badServerResponse)
+        }
+        
         // Validate the HTTP response status
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
             throw URLError(.badServerResponse)
         }
-
+        
         // Decode the JSON response into the expected data model
         return try JSONDecoder().decode(T.self, from: data)
     }
