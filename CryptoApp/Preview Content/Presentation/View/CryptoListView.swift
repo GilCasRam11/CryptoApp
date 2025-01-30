@@ -7,10 +7,10 @@
 import SwiftUI
 
 struct CryptoListView: View {
-    @StateObject private var viewModel = CryptoViewModel()
-    
+    @StateObject var viewModel = CryptoViewModel()
+
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 if viewModel.isLoading {
                     ProgressView("Loading...")
@@ -19,24 +19,30 @@ struct CryptoListView: View {
                         .foregroundColor(.red)
                 } else {
                     List(viewModel.cryptos) { crypto in
-                        CryptoRowView(crypto: crypto)
+                        NavigationLink(value: crypto) {
+                            CryptoRowView(viewModel: viewModel, crypto: crypto)
+                        }
                     }
                     .listStyle(PlainListStyle())
                 }
             }
             .navigationTitle("Cryptocurrencies")
+            .navigationDestination(for: Crypto.self) { crypto in
+                CryptoDetailView(viewModel: CryptoDetailViewModel(crypto: crypto))
+            }
             .refreshable {
-                viewModel.fetchCryptos()  // Quitamos 'await'
+                viewModel.fetchCryptos()
             }
         }
         .onAppear {
-            if viewModel.cryptos.isEmpty { viewModel.fetchCryptos() }  // No usar `.task {}`
+            if viewModel.cryptos.isEmpty { viewModel.fetchCryptos() }
         }
     }
 }
 
 
 struct CryptoRowView: View {
+    @ObservedObject var viewModel: CryptoViewModel
     let crypto: Crypto
     
     var body: some View {
@@ -63,25 +69,11 @@ struct CryptoRowView: View {
                 Text("$\(crypto.currentPrice, specifier: "%.2f")")
                     .font(.headline)
                     .foregroundColor(.green)
-                Text(formatDate(crypto.lastUpdated))
+                Text(viewModel.formatDate(crypto.lastUpdated))
                     .font(.footnote)
                     .foregroundColor(.gray)
             }
         }
         .padding(.vertical, 5)
-    }
-    
-    private func formatDate(_ dateString: String) -> String {
-        let isoFormatter = ISO8601DateFormatter()
-        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds] // Soporta milisegundos
-        
-        if let date = isoFormatter.date(from: dateString) {
-            let formatter = DateFormatter()
-            formatter.dateStyle = .medium
-            formatter.timeStyle = .short
-            return formatter.string(from: date)
-        }
-        
-        return "N/A"
     }
 }

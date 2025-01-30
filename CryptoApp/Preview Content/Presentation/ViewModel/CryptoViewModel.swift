@@ -46,5 +46,18 @@ class CryptoViewModel: ObservableObject {
             isLoading = false
         }
     }
+    func formatDate(_ dateString: String) -> String {
+        let isoFormatter = ISO8601DateFormatter()
+        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds] // Soporta milisegundos
+        
+        if let date = isoFormatter.date(from: dateString) {
+            let formatter = DateFormatter()
+            formatter.dateStyle = .medium
+            formatter.timeStyle = .short
+            return formatter.string(from: date)
+        }
+        
+        return "N/A"
+    }
 }
 
