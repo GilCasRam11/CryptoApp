@@ -19,6 +19,8 @@ struct Crypto: Identifiable, Decodable, Hashable {
     let low24h: Double
     let priceChange24h: Double
     let marketCap: Double
+    var priceHistory: [PricePoint]?
+    
     
     enum CodingKeys: String, CodingKey {
         case id, name, symbol, image
@@ -29,5 +31,12 @@ struct Crypto: Identifiable, Decodable, Hashable {
         case low24h = "low_24h"
         case priceChange24h = "price_change_24h"
         case marketCap = "market_cap"
+        case priceHistory = "prices"
     }
+}
+
+struct PricePoint: Identifiable, Codable, Hashable {
+    var id = UUID()
+    let date: Date
+    let price: Double
 }
