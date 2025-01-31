@@ -10,16 +10,12 @@ struct CryptoListView: View {
     @StateObject private var viewModel = CryptoViewModel()
     @FetchRequest(
         entity: CryptoEntity.entity(),
-        sortDescriptors: [NSSortDescriptor(keyPath: \CryptoEntity.marketCap, ascending: false)]
+        sortDescriptors: [NSSortDescriptor(keyPath: \CryptoEntity.marketCap, ascending: true)]
     ) private var storedCryptos: FetchedResults<CryptoEntity>
     @Environment(\.managedObjectContext) private var context
     var body: some View {
         NavigationStack {
-            
             VStack {
-                TextField("Search Crypto", text: $viewModel.searchText)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
                 Picker("Currency", selection: $viewModel.selectedCurrency) {
                     Text("USD ($)").tag("usd")
                     Text("EUR (€)").tag("eur")
@@ -33,14 +29,11 @@ struct CryptoListView: View {
                     Text("Offline Mode")
                         .font(.caption)
                         .foregroundColor(.orange)
-                        .padding(5)
+                        .padding()
                         .background(Color.yellow.opacity(0.2))
                         .cornerRadius(5)
-                        .onAppear { print("🟠 Offline Mode UI Updated") }
                 }
-                if viewModel.isLoading {
-                    ProgressView("Loading...")
-                } else if let errorMessage = viewModel.errorMessage {
+                if let errorMessage = viewModel.errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.red)
                 } else {
@@ -60,6 +53,8 @@ struct CryptoListView: View {
                         }
                     }
                     .listStyle(PlainListStyle())
+                    .redacted(reason: viewModel.isLoading ? .placeholder : [])
+                    .shimmering(active: viewModel.isLoading) //
                 }
             }
             .navigationTitle("Cryptocurrencies")
@@ -71,6 +66,7 @@ struct CryptoListView: View {
                     await viewModel.fetchCryptos()
                 }
             }
+            .searchable(text: $viewModel.searchText, prompt: "Search crypto by name")
         }
         .task {
             await viewModel.fetchCryptos()

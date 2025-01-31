@@ -45,12 +45,23 @@ struct CryptoDetailView: View {
                 .background(Color(.systemGray6))
                 .cornerRadius(10)
                 .shadow(radius: 3)
-                
+                CryptoChartView(priceHistory: $viewModel.priceHistory)
                 Spacer()
             }
             .padding()
+            
         }
         .navigationTitle(viewModel.crypto.name)
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            Task {
+                await viewModel.fetchPriceHistory(days: "7") 
+            }
+        }
+        .refreshable {
+            Task {
+                await viewModel.fetchPriceHistory(days: "7")
+            }
+        }
     }
 }

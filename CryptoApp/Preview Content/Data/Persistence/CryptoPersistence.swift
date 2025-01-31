@@ -33,7 +33,19 @@ class CryptoPersistence {
                     entity.low24h = crypto.low24h
                     entity.priceChange24h = crypto.priceChange24h
                     entity.marketCap = crypto.marketCap
+                    // ✅ Verificar antes de guardar
+                    if ((crypto.priceHistory?.isEmpty) != nil) {
+                        print("⚠️ Not saving priceHistory for \(crypto.name) because it's empty")
+                    } else {
+                        if let encodedHistory = try? JSONEncoder().encode(crypto.priceHistory) {
+                            entity.setValue(encodedHistory, forKey: "priceHistory")
+                            print("✅ Price history saved for \(crypto.name): \(String(describing: crypto.priceHistory?.count)) points")
+                        } else {
+                            print("❌ Failed to encode priceHistory for \(crypto.name)")
+                        }
+                    }
                 }
+                
             } catch {
                 print("❌ Error checking for existing CryptoEntity: \(error.localizedDescription)")
             }
@@ -63,7 +75,8 @@ class CryptoPersistence {
                     high24h: entity.high24h,
                     low24h: entity.low24h,
                     priceChange24h: entity.priceChange24h,
-                    marketCap: entity.marketCap
+                    marketCap: entity.marketCap,
+                    priceHistory: entity.decodePriceHistory()
                 )
             }
             print("📡 Core Data fetched \(cryptos.count) items.")
@@ -101,7 +114,25 @@ extension CryptoEntity {
             high24h: self.high24h,
             low24h: self.low24h,
             priceChange24h: self.priceChange24h,
-            marketCap: self.marketCap
+            marketCap: self.marketCap,
+            priceHistory: self.priceHistoryDecoded
         )
+    }
+    func decodePriceHistory() -> [PricePoint] {
+        guard let data = self.value(forKey: "priceHistory") as? Data else {
+//            print("⚠️ No price history data found in Core Data for \(self.name ?? "Unknown")")
+            return []
+        }
+        do {
+            let decodedHistory = try JSONDecoder().decode([PricePoint].self, from: data)
+            print("📡 Price history loaded for \(self.name ?? "Unknown"): \(decodedHistory.count) points")
+            return decodedHistory
+        } catch {
+            print("❌ Error decoding priceHistory: \(error.localizedDescription)")
+            return []
+        }
+    }
+    var priceHistoryDecoded: [PricePoint] {
+        return decodePriceHistory()
     }
 }

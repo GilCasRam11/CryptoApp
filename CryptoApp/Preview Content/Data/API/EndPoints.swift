@@ -15,4 +15,7 @@ enum API {
         /// Endpoint for retrieving cryptocurrency market data
         static let cryptoMarkets = "/coins/markets"
     }
+    static func priceHistory(cryptoId: String, days: String) -> String {
+        return "https://api.coingecko.com/api/v3/coins/\(cryptoId)/market_chart?vs_currency=usd&days=\(days)"
+    }
 }
