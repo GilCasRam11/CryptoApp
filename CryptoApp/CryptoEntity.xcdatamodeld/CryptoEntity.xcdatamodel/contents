@@ -10,6 +10,7 @@
         <attribute name="marketCap" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="name" optional="YES" attributeType="String"/>
         <attribute name="priceChange24h" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="priceHistory" optional="YES" attributeType="Binary"/>
         <attribute name="symbol" optional="YES" attributeType="String"/>
         <attribute name="totalVolume" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
     </entity>

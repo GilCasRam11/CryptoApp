@@ -38,7 +38,7 @@ class CryptoViewModel: ObservableObject {
     func fetchCryptos() async {
         isLoading = true
         errorMessage = nil
-        print("🔄 Fetching cryptos...")
+        print("🌍 Fetching cryptos...")
         do {
             let cryptosData = try await repository.getCryptos(currency: selectedCurrency)
             DispatchQueue.main.async {
@@ -66,8 +66,10 @@ class CryptoViewModel: ObservableObject {
                 print("❌ ViewModel Error: \(error.localizedDescription)")
             }
         }
-        
-        isLoading = false
+        //TODO: Is just to see the skeleton
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.isLoading = false
+        }
     }
     
     func formatDate(_ dateString: String) -> String {

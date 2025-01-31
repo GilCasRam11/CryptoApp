@@ -17,6 +17,7 @@ protocol APIClientProtocol {
     /// - Returns: A decoded object of type `T` conforming to `Decodable`
     /// - Throws: An error if the request fails or decoding is unsuccessful
     func fetch<T: Decodable>(url: String, parameters: [String: String]?) async throws -> T
+    func fetchPriceHistory<T: Decodable>(url: String, parameters: [String: String]?) async throws -> T
 }
 
 /// Default implementation of the `APIClient` protocol
@@ -58,4 +59,37 @@ class APIClient: APIClientProtocol {
         // Decode the JSON response into the expected data model
         return try JSONDecoder().decode(T.self, from: data)
     }
+    
+    func fetchPriceHistory<T: Decodable>(url: String, parameters: [String: String]? = nil) async throws -> T {
+        
+        guard let url = URL(string: url) else {
+            print("❌ Invalid URL: \(url)")
+            throw URLError(.badURL)
+        }
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(from: url)
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("❌ Response is not HTTPURLResponse")
+                throw URLError(.cannotParseResponse)
+            }
+            
+            guard (200...299).contains(httpResponse.statusCode) else {
+                print("❌ API returned error code: \(httpResponse.statusCode)")
+                throw URLError(.badServerResponse)
+            }
+            
+            //            if let jsonString = String(data: data, encoding: .utf8) {
+            //                print("📜 Response JSON: \(jsonString)")
+            //            }
+            
+            return try JSONDecoder().decode(T.self, from: data)
+            
+        } catch {
+            print("❌ Fetching error: \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
 }

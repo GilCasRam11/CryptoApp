@@ -14,6 +14,7 @@ protocol CryptoServiceProtocol {
     /// - Returns: An array of `Crypto` objects
     /// - Throws: An error if the request fails or data decoding is unsuccessful
     func fetchCryptos(currency: String) async throws -> [Crypto]
+    func fetchPriceHistory(for cryptoId: String, days: String) async throws -> [PricePoint]
 }
 
 /// Default implementation of the `CryptoService` protocol
@@ -45,6 +46,22 @@ class CryptoService: CryptoServiceProtocol {
         } catch {
             print("❌ Error fetching cryptos: \(error.localizedDescription)")
             throw error
+        }
+    }
+    
+    func fetchPriceHistory(for cryptoId: String, days: String) async throws -> [PricePoint] {
+        let urlString = API.priceHistory(cryptoId: cryptoId, days: days)
+        
+        let historyData: [String: [[Double]]] = try await apiClient.fetchPriceHistory(url: urlString, parameters: nil)
+        
+        guard let prices = historyData["prices"] else {
+            throw URLError(.cannotParseResponse)
+        }
+        
+        return prices.compactMap { priceEntry in
+            guard priceEntry.count == 2 else { return nil }
+            let date = Date(timeIntervalSince1970: priceEntry[0] / 1000)
+            return PricePoint(date: date, price: priceEntry[1])
         }
     }
 }
