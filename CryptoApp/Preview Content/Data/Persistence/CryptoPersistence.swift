@@ -5,21 +5,26 @@
 //  Created by Gil Alfredo Casimiro Ramírez on 30/01/25.
 //
 
-
 import CoreData
 
+/// Manages the persistence of cryptocurrency data using Core Data.
 class CryptoPersistence {
+    /// Reference to the shared Core Data context.
     private let context = CoreDataManager.shared.context
-    
+    /// Saves an array of `Crypto` objects to Core Data.
+    /// - Parameter cryptos: An array of `Crypto` objects to be stored in the database.
     func saveCryptos(_ cryptos: [Crypto]) {
         let context = CoreDataManager.shared.context
-        
         for crypto in cryptos {
+            // Create a fetch request to check if the cryptocurrency already exists in Core Data
             let fetchRequest: NSFetchRequest<CryptoEntity> = CryptoEntity.fetchRequest()
             fetchRequest.predicate = NSPredicate(format: "id == %@", crypto.id)
-            CoreDataManager.shared.saveContext()
+            CoreDataManager.shared.saveContext() // Ensure any previous changes are saved
+            
             do {
+                // Fetch existing records with the same `id`
                 let existingCryptos = try context.fetch(fetchRequest)
+                // If no existing record is found, create a new entity
                 if existingCryptos.isEmpty {
                     let entity = CryptoEntity(context: context)
                     entity.id = crypto.id
@@ -33,10 +38,12 @@ class CryptoPersistence {
                     entity.low24h = crypto.low24h
                     entity.priceChange24h = crypto.priceChange24h
                     entity.marketCap = crypto.marketCap
-                    // ✅ Verificar antes de guardar
-                    if ((crypto.priceHistory?.isEmpty) != nil) {
+                    
+                    // Check if price history is available before saving
+                    if crypto.priceHistory?.isEmpty ?? true {
                         print("⚠️ Not saving priceHistory for \(crypto.name) because it's empty")
                     } else {
+                        // Encode `priceHistory` into `Data` before saving
                         if let encodedHistory = try? JSONEncoder().encode(crypto.priceHistory) {
                             entity.setValue(encodedHistory, forKey: "priceHistory")
                             print("✅ Price history saved for \(crypto.name): \(String(describing: crypto.priceHistory?.count)) points")
@@ -45,12 +52,11 @@ class CryptoPersistence {
                         }
                     }
                 }
-                
             } catch {
                 print("❌ Error checking for existing CryptoEntity: \(error.localizedDescription)")
             }
         }
-        
+        // Attempt to save all new entities to Core Data
         do {
             try context.save()
             print("✅ Core Data saved \(cryptos.count) new items (duplicates avoided).")
@@ -58,11 +64,16 @@ class CryptoPersistence {
             print("❌ Error saving to Core Data: \(error.localizedDescription)")
         }
     }
-    
+
+    /// Fetches all stored cryptocurrencies from Core Data and converts them into `Crypto` model objects.
+    /// - Returns: An array of `Crypto` objects retrieved from Core Data.
     func fetchCryptos() -> [Crypto] {
+        // Create a fetch request for `CryptoEntity`
         let request: NSFetchRequest<CryptoEntity> = CryptoEntity.fetchRequest()
         do {
+            // Fetch the stored data from Core Data
             let results = try context.fetch(request)
+            // Convert `CryptoEntity` objects into `Crypto` model instances
             let cryptos = results.map { entity in
                 Crypto(
                     id: entity.id ?? "",
@@ -80,28 +91,35 @@ class CryptoPersistence {
                 )
             }
             print("📡 Core Data fetched \(cryptos.count) items.")
-            return cryptos
+            return cryptos // Return the list of converted `Crypto` objects
         } catch {
             print("❌ Error fetching data from Core Data: \(error.localizedDescription)")
-            return []
+            return [] // Return an empty array in case of failure
         }
     }
-    
+
+    /// Deletes all stored cryptocurrency data from Core Data.
     func clearData() {
+        // Create a fetch request targeting all `CryptoEntity` objects
         let request: NSFetchRequest<NSFetchRequestResult> = CryptoEntity.fetchRequest()
+        // Create a batch delete request to remove all matching entities
         let deleteRequest = NSBatchDeleteRequest(fetchRequest: request)
-        
         do {
+            // Execute the batch delete request
             try context.execute(deleteRequest)
+            // Save changes to persist the deletion
             try context.save()
             print("🗑 Core Data cleared before saving new data.")
         } catch {
+            // Log any errors that occur during the deletion process
             print("❌ Error clearing Core Data: \(error.localizedDescription)")
         }
     }
 }
 
 extension CryptoEntity {
+    /// Converts a `CryptoEntity` (Core Data object) into a `Crypto` model.
+    /// - Returns: A `Crypto` object with all stored attributes mapped correctly.
     func toCrypto() -> Crypto {
         return Crypto(
             id: self.id ?? "",
@@ -118,9 +136,12 @@ extension CryptoEntity {
             priceHistory: self.priceHistoryDecoded
         )
     }
+    /// Decodes the stored `priceHistory` from Core Data into an array of `PricePoint`.
+    /// - Returns: An array of `PricePoint` objects representing the historical price data.
     func decodePriceHistory() -> [PricePoint] {
+        // Attempt to retrieve and decode the price history from stored Core Data `Data`
         guard let data = self.value(forKey: "priceHistory") as? Data else {
-//            print("⚠️ No price history data found in Core Data for \(self.name ?? "Unknown")")
+            print("⚠️ No price history data found in Core Data for \(self.name ?? "Unknown")")
             return []
         }
         do {
@@ -132,7 +153,9 @@ extension CryptoEntity {
             return []
         }
     }
+    /// Computed property that returns the decoded price history.
     var priceHistoryDecoded: [PricePoint] {
         return decodePriceHistory()
     }
 }
+

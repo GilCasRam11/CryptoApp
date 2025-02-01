@@ -9,7 +9,8 @@
 import Foundation
 import CoreData
 
+/// Represents a cryptocurrency entity stored in Core Data.
 @objc(CryptoEntity)
 public class CryptoEntity: NSManagedObject {
-    //Code here
+    // Properties and methods for the CryptoEntity will go here.
 }

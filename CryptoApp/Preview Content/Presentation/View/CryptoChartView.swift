@@ -9,13 +9,13 @@
 import SwiftUI
 import Charts
 
+/// Represents different types of charts available for displaying cryptocurrency data.
 enum ChartType: String, CaseIterable {
     case line = "Line Chart"
     case area = "Area Chart"
     case bar = "Bar Chart"
     case scatter = "Scatter Plot"
 }
-
 
 struct CryptoChartView: View {
     @Binding var priceHistory: [PricePoint]
@@ -33,19 +33,17 @@ struct CryptoChartView: View {
             }
             .pickerStyle(SegmentedPickerStyle())
             .padding()
-            
             Chart {
                 switch selectedChart {
                 case .line:
                     ForEach(priceHistory) { point in
                         LineMark(
-                            x: .value("Date", point.date),
-                            y: .value("Price", point.price)
+                            x: .value("Date", point.date),// Sets the x-axis to represent dates
+                            y: .value("Price", point.price) // Sets the y-axis to represent prices
                         )
-                        .foregroundStyle(.blue)
-                        .interpolationMethod(.monotone)
+                        .foregroundStyle(Color.init(hex: "B400FB"))
+                        .interpolationMethod(.monotone)// Uses a smooth curve interpolation for better visualization
                     }
-                    
                 case .area:
                     ForEach(priceHistory) { point in
                         AreaMark(
@@ -55,14 +53,13 @@ struct CryptoChartView: View {
                         .foregroundStyle(Gradient(colors: [.blue.opacity(0.6), .clear]))
                         .interpolationMethod(.monotone)
                     }
-                    
                 case .bar:
                     ForEach(priceHistory) { point in
                         BarMark(
                             x: .value("Date", point.date),
                             y: .value("Price", point.price)
                         )
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(Color.init(hex: "4682B4"))
                     }
                 case .scatter:
                     ForEach(priceHistory) { point in
@@ -70,21 +67,12 @@ struct CryptoChartView: View {
                             x: .value("Date", point.date),
                             y: .value("Price", point.price)
                         )
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(Color.init(hex: "edff21"))
                     }
                 }
             }
             .frame(height: 250)
             .padding()
         }
-        .onAppear {
-            print("priceHistory: \(self.priceHistory.count)")
-        }
-    }
-    func formatDate(_ value: Any) -> String {
-        guard let date = value as? Date else { return "" }
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d"
-        return formatter.string(from: date)
     }
 }

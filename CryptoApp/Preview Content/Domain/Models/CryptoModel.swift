@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// Represents a cryptocurrency with market data.
 struct Crypto: Identifiable, Decodable, Hashable {
     let id: String
     let name: String
@@ -21,7 +22,7 @@ struct Crypto: Identifiable, Decodable, Hashable {
     let marketCap: Double
     var priceHistory: [PricePoint]?
     
-    
+    /// Coding keys to map JSON properties to Swift properties.
     enum CodingKeys: String, CodingKey {
         case id, name, symbol, image
         case currentPrice = "current_price"
@@ -35,6 +36,7 @@ struct Crypto: Identifiable, Decodable, Hashable {
     }
 }
 
+/// Represents a single historical price data point.
 struct PricePoint: Identifiable, Codable, Hashable {
     var id = UUID()
     let date: Date
