@@ -4,6 +4,7 @@
 //
 //  Created by Gil Alfredo Casimiro Ramírez on 29/01/25.
 //
+
 import SwiftUI
 
 struct CryptoListView: View {
@@ -17,7 +18,9 @@ struct CryptoListView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                Picker("Currency", selection: $viewModel.selectedCurrency) {
+                SearchBarView(searchText: $viewModel.searchText)
+                    .padding(.top)
+                Picker(CryptoLocalizedStrings.currency, selection: $viewModel.selectedCurrency) {
                     Text("💲 USD").tag("usd")
                     Text("💶 EUR").tag("eur")
                     Text("🇲🇽 MXN").tag("mxn")
@@ -32,7 +35,7 @@ struct CryptoListView: View {
                     Task { await viewModel.fetchCryptos() }
                 })
                 if viewModel.isOffline {
-                    Text("Offline Mode")
+                    Text(CryptoLocalizedStrings.offline_mode)
                         .font(.caption)
                         .foregroundColor(.orange)
                         .padding()
@@ -48,12 +51,14 @@ struct CryptoListView: View {
                             ForEach(viewModel.filteredCryptos, id: \.self) { cryptoEntity in
                                 NavigationLink(value: cryptoEntity) {
                                     CryptoRowView(viewModel: viewModel, crypto: cryptoEntity)
+                                        .accessibilityIdentifier("CryptoCell_\(cryptoEntity.id)")
                                 }
                             }
                         } else {
                             ForEach(viewModel.filteredCryptos) { crypto in
                                 NavigationLink(value: crypto) {
                                     CryptoRowView(viewModel: viewModel, crypto: crypto)
+                                        .accessibilityIdentifier("CryptoCell_\(crypto.id)")
                                 }
                             }
                         }
@@ -61,10 +66,11 @@ struct CryptoListView: View {
                     .redacted(reason: viewModel.isLoading ? .placeholder : [])
                 }
             }
-            .background(Color.init(hex: "393D42").ignoresSafeArea())
-            .navigationTitle("Crypto currencies")
+            .background(Color.background.ignoresSafeArea())
+            .navigationTitle(CryptoLocalizedStrings.crypto_currencies)
             .navigationDestination(for: Crypto.self) { crypto in
                 CryptoDetailView(viewModel: CryptoDetailViewModel(crypto: crypto))
+                    .accessibilityIdentifier("CryptoDetailView") 
             }
             .refreshable {
                 // Creates a new asynchronous task to fetch price history data
@@ -72,12 +78,11 @@ struct CryptoListView: View {
                     await viewModel.fetchCryptos()
                 }
             }
-            .searchable(text: $viewModel.searchText, prompt: "Search crypto by name")
         }
         // Creates a new asynchronous task to fetch price history data
         .task {
             await viewModel.fetchCryptos()
         }
-       
+        .accessibilityIdentifier("CryptoListView")
     }
 }

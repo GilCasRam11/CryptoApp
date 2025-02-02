@@ -1,0 +1,33 @@
+/* 
+  Localizable.strings
+  CryptoApp
+
+  Created by Gil Alfredo Casimiro Ramírez on 01/02/25.
+  
+*/
+
+//MARK: SplashScreeView
+"crypto_app" = "Crypto App";
+
+//MARK: CryptoListView
+"currency" = "Currency";
+"offline_mode" = "Offline Mode";
+"crypto_currencies" = "Crypto Currencies";
+
+//MARK: CryptoDetailView
+"current_price" = "Current Price";
+"total_olume" = "Total Volume";
+"highest_price" = "Highest Price (24h)";
+"lowest_price" = "Lowest Price (24h)";
+"price_change" = "Price Change (24h)";
+"market_cap" = "Market Cap";
+"error" = "Error";
+"alert_service_error" = "The history service could not be loaded";
+"ok" = "OK";
+
+//MARK: CryptoChartView
+"price_trend" = "Price Trend";
+"select_chart_type" = "Select Chart Type";
+
+//MARK: SearchBarView
+"search_crypto_by_name" = "Search crypto by name";

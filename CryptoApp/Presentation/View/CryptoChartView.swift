@@ -23,10 +23,10 @@ struct CryptoChartView: View {
     
     var body: some View {
         VStack {
-            Text("Price Trend")
+            Text(CryptoLocalizedStrings.price_trend)
                 .font(.headline)
                 .padding(.top)
-            Picker("Select Chart Type", selection: $selectedChart) {
+            Picker(CryptoLocalizedStrings.select_chart_type, selection: $selectedChart) {
                 ForEach(ChartType.allCases, id: \.self) { chart in
                     Text(chart.rawValue).tag(chart)
                 }
@@ -36,7 +36,9 @@ struct CryptoChartView: View {
             Chart {
                 switch selectedChart {
                 case .line:
+                    /// Loops through the `priceHistory` array to create an area chart visualization.
                     ForEach(priceHistory) { point in
+                        /// Creates an `LineMark` for each historical price data point.
                         LineMark(
                             x: .value("Date", point.date),// Sets the x-axis to represent dates
                             y: .value("Price", point.price) // Sets the y-axis to represent prices
@@ -45,13 +47,15 @@ struct CryptoChartView: View {
                         .interpolationMethod(.monotone)// Uses a smooth curve interpolation for better visualization
                     }
                 case .area:
+                    /// Loops through the `priceHistory` array to create an area chart visualization.
                     ForEach(priceHistory) { point in
+                        /// Creates an `AreaMark` for each historical price data point.
                         AreaMark(
-                            x: .value("Date", point.date),
-                            y: .value("Price", point.price)
+                            x: .value("Date", point.date),   // Sets the x-axis as the date of the price point.
+                            y: .value("Price", point.price)  // Sets the y-axis as the corresponding price.
                         )
                         .foregroundStyle(Gradient(colors: [.blue.opacity(0.6), .clear]))
-                        .interpolationMethod(.monotone)
+                        .interpolationMethod(.monotone) // Applies a smooth curve between data points for a better visual flow.
                     }
                 case .bar:
                     ForEach(priceHistory) { point in

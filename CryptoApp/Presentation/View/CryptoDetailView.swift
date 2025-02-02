@@ -22,6 +22,7 @@ struct CryptoDetailView: View {
                             .resizable()
                             .frame(width: 15, height: 25)
                     })
+                    .accessibilityIdentifier("BackButton")
                     Spacer()
                 }
                 AsyncImage(url: URL(string: viewModel.crypto.image)) { image in
@@ -41,12 +42,13 @@ struct CryptoDetailView: View {
                     .font(.title2)
                     .foregroundColor(.gray)
                 VStack(spacing: 10) {
-                    DetailRowView(title: "Current Price", value: viewModel.crypto.currentPrice)
-                    DetailRowView(title: "Total Volume", value: viewModel.crypto.totalVolume)
-                    DetailRowView(title: "Highest Price (24h)", value: viewModel.crypto.high24h)
-                    DetailRowView(title: "Lowest Price (24h)", value: viewModel.crypto.low24h)
-                    DetailRowView(title: "Price Change (24h)", value: viewModel.crypto.priceChange24h)
-                    DetailRowView(title: "Market Cap", value: viewModel.crypto.marketCap)
+                    DetailRowView(title: CryptoLocalizedStrings.current_price, value: viewModel.crypto.currentPrice)
+                        .accessibilityIdentifier("CryptoPriceLabel")
+                    DetailRowView(title: CryptoLocalizedStrings.total_olume, value: viewModel.crypto.totalVolume)
+                    DetailRowView(title: CryptoLocalizedStrings.highest_price, value: viewModel.crypto.high24h)
+                    DetailRowView(title: CryptoLocalizedStrings.lowest_price, value: viewModel.crypto.low24h)
+                    DetailRowView(title: CryptoLocalizedStrings.price_change, value: viewModel.crypto.priceChange24h)
+                    DetailRowView(title: CryptoLocalizedStrings.market_cap, value: viewModel.crypto.marketCap)
                 }
                 .padding()
                 .background(Color.white)
@@ -58,13 +60,13 @@ struct CryptoDetailView: View {
                             .foregroundStyle(Color.init(hex: "D3D3D3"))
                     )
                 Spacer()
-            }
+            }.accessibilityIdentifier("CryptoDetailView")
             .padding()
         }
         .navigationBarBackButtonHidden()
-        .background(Color.init(hex: "393D42").ignoresSafeArea())
+        .background(Color.background.ignoresSafeArea())
         .alert(item: $viewModel.errorMessage) { error in
-                   Alert(title: Text("Error"), message: Text("The history service could not be loaded"), dismissButton: .default(Text("OK")))
+            Alert(title: Text(CryptoLocalizedStrings.error), message: Text(CryptoLocalizedStrings.alert_service_error), dismissButton: .default(Text(CryptoLocalizedStrings.ok)))
                }
         .onAppear {
             // Creates a new asynchronous task to fetch price history data
