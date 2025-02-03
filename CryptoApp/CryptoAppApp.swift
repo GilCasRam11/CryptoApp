@@ -9,11 +9,13 @@ import SwiftUI
 
 @main
 struct CryptoAppApp: App {
+    /// A shared instance of the Core Data manager to handle data persistence.
     let persistenceController = CoreDataManager.shared
+    
     var body: some Scene {
         WindowGroup {
-            CryptoListView()
-                .environment(\.managedObjectContext, persistenceController.context) 
+            SplashScreenView()
+                .environment(\.managedObjectContext, persistenceController.context)
         }
     }
 }
