@@ -19,7 +19,7 @@ protocol CryptoRepositoryProtocol {
     
     /// Retrieves stored cryptocurrency entities from Core Data.
     /// - Returns: An array of `CryptoEntity` objects fetched from Core Data.
-    func fetchFromCoreData() -> [CryptoEntity]
+    func fetchFromCoreData(currency: String) -> [CryptoEntity]
     
     /// Fetches historical price data for a given cryptocurrency.
     /// - Parameters:
@@ -67,7 +67,7 @@ class CryptoRepository: CryptoRepositoryProtocol {
             // Fetch cryptocurrency data from the API
             let cryptos = try await service.fetchCryptos(currency: currency)
             // Save the fetched data to Core Data for offline access
-            persistence.saveCryptos(cryptos)
+            persistence.saveCryptos(cryptos, currency: currency)
             // Return the retrieved cryptocurrency list
             return cryptos
         } catch {
@@ -79,15 +79,16 @@ class CryptoRepository: CryptoRepositoryProtocol {
     
     /// Fetches all stored cryptocurrency entities from Core Data.
     /// - Returns: An array of `CryptoEntity` objects.
-    func fetchFromCoreData() -> [CryptoEntity] {
+    func fetchFromCoreData(currency: String) -> [CryptoEntity] {
         // Create a fetch request to retrieve all stored `CryptoEntity` objects
         let request: NSFetchRequest<CryptoEntity> = CryptoEntity.fetchRequest()
+        request.predicate = NSPredicate(format: "currency == %@", currency)
         do {
             // Execute the fetch request
             let results = try context.fetch(request)
             print("📡 Core Data fetched \(results.count) items.")
+            print("📡 Core Data fetched \(results.count) items for currency: \(currency)")
             return results // Return the fetched entities
-            
         } catch {
             print("❌ Error fetching from Core Data: \(error.localizedDescription)")
             return [] // Return an empty array in case of an error

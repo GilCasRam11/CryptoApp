@@ -48,7 +48,7 @@ class CryptoDetailViewModel: ObservableObject {
             print("❌ Error fetching history from API: \(error.localizedDescription)")
             self.errorMessage = IdentifiableError(message: "Failed to load data: \(error.localizedDescription)")
             // If the API request fails, attempt to load data from Core Data
-            if let entity = repository.fetchFromCoreData().first(where: { $0.id == crypto.id }) {
+            if let entity = repository.fetchFromCoreData(currency: "usd").first(where: { $0.id == crypto.id }) {
                 self.priceHistory = entity.decodePriceHistory() // Decode stored price history
                 self.isOffline = true // Mark offline mode
                 print("📡 Loaded price history from Core Data")
