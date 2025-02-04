@@ -29,5 +29,6 @@ extension CryptoEntity {
     @NSManaged public var priceChange24h: Double
     @NSManaged public var marketCap: Double
     @NSManaged public var priceHistory: Data?
+    @NSManaged public var currency: String?
 }
 

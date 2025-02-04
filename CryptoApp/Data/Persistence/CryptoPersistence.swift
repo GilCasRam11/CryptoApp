@@ -13,12 +13,13 @@ class CryptoPersistence {
     private let context = CoreDataManager.shared.context
     /// Saves an array of `Crypto` objects to Core Data.
     /// - Parameter cryptos: An array of `Crypto` objects to be stored in the database.
-    func saveCryptos(_ cryptos: [Crypto]) {
+    func saveCryptos(_ cryptos: [Crypto], currency: String) {
+//        clearData()
         let context = CoreDataManager.shared.context
         for crypto in cryptos {
             // Create a fetch request to check if the cryptocurrency already exists in Core Data
             let fetchRequest: NSFetchRequest<CryptoEntity> = CryptoEntity.fetchRequest()
-            fetchRequest.predicate = NSPredicate(format: "id == %@", crypto.id)
+            fetchRequest.predicate = NSPredicate(format: "id == %@ AND currency == %@", crypto.id, currency)
             CoreDataManager.shared.saveContext() // Ensure any previous changes are saved
             
             do {
@@ -38,10 +39,11 @@ class CryptoPersistence {
                     entity.low24h = crypto.low24h
                     entity.priceChange24h = crypto.priceChange24h
                     entity.marketCap = crypto.marketCap
+                    entity.currency = currency
                     
                     // Check if price history is available before saving
                     if crypto.priceHistory?.isEmpty ?? true {
-                        print("⚠️ Not saving priceHistory for \(crypto.name) because it's empty")
+//                        print("⚠️ Not saving priceHistory for \(crypto.name) because it's empty")
                     } else {
                         // Encode `priceHistory` into `Data` before saving
                         if let encodedHistory = try? JSONEncoder().encode(crypto.priceHistory) {
@@ -87,7 +89,8 @@ class CryptoPersistence {
                     low24h: entity.low24h,
                     priceChange24h: entity.priceChange24h,
                     marketCap: entity.marketCap,
-                    priceHistory: entity.decodePriceHistory()
+                    priceHistory: entity.decodePriceHistory(),
+                    currency: entity.currency ?? ""
                 )
             }
             print("📡 Core Data fetched \(cryptos.count) items.")
@@ -133,7 +136,8 @@ extension CryptoEntity {
             low24h: self.low24h,
             priceChange24h: self.priceChange24h,
             marketCap: self.marketCap,
-            priceHistory: self.priceHistoryDecoded
+            priceHistory: self.priceHistoryDecoded,
+            currency: self.currency
         )
     }
     /// Decodes the stored `priceHistory` from Core Data into an array of `PricePoint`.

@@ -66,7 +66,7 @@ class CryptoViewModel: ObservableObject {
         } catch {
             // Handle API failure by loading from Core Data
             DispatchQueue.main.async {
-                let coreDataCryptos = self.repository.fetchFromCoreData()
+                let coreDataCryptos = self.repository.fetchFromCoreData(currency: self.selectedCurrency)
                 if coreDataCryptos.isEmpty {
                     // No data available in Core Data
                     self.errorMessage = "No data available"
