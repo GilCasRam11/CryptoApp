@@ -53,7 +53,7 @@ class CryptoRepositoryMock: CryptoRepositoryProtocol {
     
     /// Simulates fetching stored cryptocurrency data from Core Data.
     /// - Returns: An empty array (or mock `CryptoEntity` objects if needed).
-    func fetchFromCoreData() -> [CryptoEntity] {
+    func fetchFromCoreData(currency: String) -> [CryptoEntity] {
         return []
     }
     

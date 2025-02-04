@@ -16,7 +16,7 @@ struct DetailRowView: View {
                 .font(.headline)
                 .foregroundColor(.primary)
             Spacer()
-            Text(String(format: "$%.2f", value))
+            Text("\(value, specifier: "%.2f")")
                 .font(.subheadline)
                 .foregroundColor(value > 0 ? .green : .red)
         }

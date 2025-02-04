@@ -21,6 +21,7 @@ struct Crypto: Identifiable, Decodable, Hashable {
     let priceChange24h: Double
     let marketCap: Double
     var priceHistory: [PricePoint]?
+    var currency: String?
     
     /// Coding keys to map JSON properties to Swift properties.
     enum CodingKeys: String, CodingKey {
