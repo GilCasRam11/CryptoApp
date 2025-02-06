@@ -39,7 +39,7 @@ The project follows the Clean Architecture pattern with MVVM, dividing the appli
 
 1️⃣ Clone the repository
 
-git clone https://github.com/your-repository.git
+git clone https://github.com/GilCasRam11/CryptoApp
 
 cd CryptoApp
 
